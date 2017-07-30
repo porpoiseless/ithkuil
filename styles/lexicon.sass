@@ -1,0 +1,188 @@
+$accent-color: #444
+$accent-text: whitesmoke
+$panel-color: $accent-text
+$text-color: #222
+$tab-color: darken($panel-color, 5%)
+$tab-text: $text-color
+$page-color: #eee
+$border-color: #aaa
+
+*
+  box-sizing: border-box
+html, body
+  margin: 0
+  padding: 0
+  font-family: Lato, sans-serif
+  background: $page-color
+  color: $text-color
+.lx-wrapper
+  border-radius: 2px
+  /* box-shadow: 0 0 4px rgba(0,0,0,0.4)
+  border: 1px solid $border-color
+  margin: 24px auto
+  max-width: 720px
+  background: $panel-color
+  overflow: hidden
+.lx-header, .page-header
+  background: $accent-color
+  color: $accent-text
+.page-header
+  border-bottom: 1px solid $border-color
+header.page-header
+  border-bottom: 1px solid $border-color
+.content-wrapper
+  margin: 0
+  padding: 1px 
+  background: $page-color
+.page-header
+  margin: 0
+  padding: 8px 12px
+.lx-header
+  padding: 0
+.lx-minorRoots-heading
+  border-bottom: 1px solid $border-color
+  font-weight: 400
+  color: $text-color
+  background: $panel-color
+  margin: 24px 0 0 0
+.lx-minorRoots-list
+  list-style: none
+  margin: 0
+  padding: 0
+.lx-minorRoots-item
+  margin: 0
+  padding: 4px 12px
+  &:nth-child(even)
+    background: $tab-color
+.lx-minorRoots-heading, .lx-root, .lx-gloss
+  font-size: 18px
+  padding: 4px
+.lx-root, .lx-gloss
+  display: inline-block
+  margin: 4px
+.lx-root
+  &:before
+    content: "-"
+  &:after
+    content: "-"
+.lx-gloss
+  font-style: italic
+
+.lx-table-wrapper
+  margin: 12px
+  /* display: grid
+  /* grid-template-columns: repeat(2, 1fr)
+  /* grid-column-gap: 2px
+.lx-designation, .lx-pattern, .lx-stem
+  display: inline-block
+.lx-designation
+  counter-reset: pattern
+  display: grid
+  grid-auto-flow: column
+  grid-template-columns: repeat(3, 1fr)
+  grid-template-rows: repeat(3, 1fr)
+  grid-row-gap: 4px
+  grid-column-gap: 4px
+.pattern-0
+.pattern-1
+.pattern-2
+.lx-pattern
+  padding: 0
+  margin: 0
+  display: flex
+  flex-direction: column
+  counter-reset: stem
+  &:before
+    counter-increment: pattern
+    display: inline-block
+    color: lighten($text-color, 20%)
+    margin: 0
+    padding: 0 0 0 4px
+    border-bottom: 1px solid #ccc
+    content: "Pattern " counter(pattern)
+.lx-stem
+  margin: 0
+  padding: 4px
+  border: 1px solid gainsboro
+  transition: all 250ms ease-out
+  position: relative
+  overflow: hidden
+  p
+    margin: 0 4px
+  /* &:before
+  /*   counter-increment: stem
+  /*   content: "P" counter(pattern) "S" counter(stem) "."
+  /*   position: absolute
+  /*   color: $accent-text
+  /*   background: $accent-color
+  /*   width: auto
+  /*   top: -20px
+  /*   padding: 0 0 0 4px 
+  /*   display: block
+  /*   z-index: 5
+  /*   transition: all 250ms ease-out
+  /* &:hover:before
+  /*   top: 0
+  /*   transition: all 190ms ease-in
+.hidden
+  display: none
+  visibility: hidden
+
+.tab-bar 
+  overflow: hidden
+  background: $tab-color
+  color: $tab-text
+  margin: 0 0 12px 0
+  padding: 12px 0 0 0
+  border-top: 1px solid $border-color
+.tab-list
+  margin: 0
+  padding: 0 12px
+  display: flex
+  flex-direction: row
+  justify-content: space-around
+  align-content: space-around
+  border-bottom: 1px solid $border-color
+.tab-item
+  border-radius: 2px 2px 0 0
+  border-color: $tab-color
+  text-align: center
+  position: relative
+  width: 100%
+  text-transform: uppercase
+  padding-top: 6px
+  display: inline-block
+  /* box-shadow: inset 0px -1px 1px rgba(0,0,0,0.3), inset 0px 1px 1px rgba(255,255,255,0.5)
+  transition: all 250ms ease-out
+  /* text-shadow: 1px 1px 1px rgba(255,255,255,1)
+  &:hover
+    background: darken($panel-color, 2%)
+    border-top: 1px solid $border-color
+    &:first-child
+      border-left: 1px solid $border-color
+    &:last-child
+      border-right: 1px solid $border-color
+.active, .active:hover
+  color: $text-color
+  z-index: 5
+  /* box-shadow: 0 0 2px rgba(0,0,0,0.4)
+  background: whitesmoke
+  transition: all 190ms ease-in
+  border-top: 1px solid $border-color
+  border-left: 1px solid $border-color
+  border-right: 1px solid $border-color
+  &:after
+    position: absolute
+    content: " "
+    display: block
+    bottom: -1
+    width: 100%
+    z-index: 9
+    border-bottom: 1px solid $panel-color
+  /* &:first-child
+  /*   border-left: none
+  /* &:last-child
+  /*   border-right: none
+.hidden
+  visibility: none
+  display: none

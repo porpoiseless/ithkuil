@@ -1,0 +1,201 @@
+* {
+  box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: Lato, sans-serif;
+  background: #eee;
+  color: #222; }
+
+.lx-wrapper {
+  border-radius: 2px;
+  /* box-shadow: 0 0 4px rgba(0,0,0,0.4) */
+  border: 1px solid #aaa;
+  margin: 24px auto;
+  max-width: 720px;
+  background: whitesmoke;
+  overflow: hidden; }
+
+.lx-header, .page-header {
+  background: #444;
+  color: whitesmoke; }
+
+.page-header {
+  border-bottom: 1px solid #aaa; }
+
+header.page-header {
+  border-bottom: 1px solid #aaa; }
+
+.content-wrapper {
+  margin: 0;
+  padding: 1px;
+  background: #eee; }
+
+.page-header {
+  margin: 0;
+  padding: 8px 12px; }
+
+.lx-header {
+  padding: 0; }
+
+.lx-minorRoots-heading {
+  border-bottom: 1px solid #aaa;
+  font-weight: 400;
+  color: #222;
+  background: whitesmoke;
+  margin: 24px 0 0 0; }
+
+.lx-minorRoots-list {
+  list-style: none;
+  margin: 0;
+  padding: 0; }
+
+.lx-minorRoots-item {
+  margin: 0;
+  padding: 4px 12px; }
+  .lx-minorRoots-item:nth-child(even) {
+    background: #e8e8e8; }
+
+.lx-minorRoots-heading, .lx-root, .lx-gloss {
+  font-size: 18px;
+  padding: 4px; }
+
+.lx-root, .lx-gloss {
+  display: inline-block;
+  margin: 4px; }
+
+.lx-root:before {
+  content: "-"; }
+.lx-root:after {
+  content: "-"; }
+
+.lx-gloss {
+  font-style: italic; }
+
+.lx-table-wrapper {
+  margin: 12px;
+  /* display: grid */
+  /* grid-template-columns: repeat(2, 1fr) */
+  /* grid-column-gap: 2px */ }
+
+.lx-designation, .lx-pattern, .lx-stem {
+  display: inline-block; }
+
+.lx-designation {
+  counter-reset: pattern;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  grid-row-gap: 4px;
+  grid-column-gap: 4px; }
+
+.lx-pattern {
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  counter-reset: stem; }
+  .lx-pattern:before {
+    counter-increment: pattern;
+    display: inline-block;
+    color: #555555;
+    margin: 0;
+    padding: 0 0 0 4px;
+    border-bottom: 1px solid #ccc;
+    content: "Pattern " counter(pattern); }
+
+.lx-stem {
+  margin: 0;
+  padding: 4px;
+  border: 1px solid gainsboro;
+  transition: all 250ms ease-out;
+  position: relative;
+  overflow: hidden;
+  /* &:before */
+  /*   counter-increment: stem */
+  /*   content: "P" counter(pattern) "S" counter(stem) "." */
+  /*   position: absolute */
+  /*   color: $accent-text */
+  /*   background: $accent-color */
+  /*   width: auto */
+  /*   top: -20px */
+  /*   padding: 0 0 0 4px */
+  /*   display: block */
+  /*   z-index: 5 */
+  /*   transition: all 250ms ease-out */
+  /* &:hover:before */
+  /*   top: 0 */
+  /*   transition: all 190ms ease-in */ }
+  .lx-stem p {
+    margin: 0 4px; }
+
+.hidden {
+  display: none;
+  visibility: hidden; }
+
+.tab-bar {
+  overflow: hidden;
+  background: #e8e8e8;
+  color: #222;
+  margin: 0 0 12px 0;
+  padding: 12px 0 0 0;
+  border-top: 1px solid #aaa; }
+
+.tab-list {
+  margin: 0;
+  padding: 0 12px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-content: space-around;
+  border-bottom: 1px solid #aaa; }
+
+.tab-item {
+  border-radius: 2px 2px 0 0;
+  border-color: #e8e8e8;
+  text-align: center;
+  position: relative;
+  width: 100%;
+  text-transform: uppercase;
+  padding-top: 6px;
+  display: inline-block;
+  /* box-shadow: inset 0px -1px 1px rgba(0,0,0,0.3), inset 0px 1px 1px rgba(255,255,255,0.5) */
+  transition: all 250ms ease-out;
+  /* text-shadow: 1px 1px 1px rgba(255,255,255,1) */ }
+  .tab-item:hover {
+    background: #f0f0f0;
+    border-top: 1px solid #aaa; }
+    .tab-item:hover:first-child {
+      border-left: 1px solid #aaa; }
+    .tab-item:hover:last-child {
+      border-right: 1px solid #aaa; }
+
+.active, .active:hover {
+  color: #222;
+  z-index: 5;
+  /* box-shadow: 0 0 2px rgba(0,0,0,0.4) */
+  background: whitesmoke;
+  transition: all 190ms ease-in;
+  border-top: 1px solid #aaa;
+  border-left: 1px solid #aaa;
+  border-right: 1px solid #aaa;
+  /* &:first-child */
+  /*   border-left: none */
+  /* &:last-child */
+  /*   border-right: none */ }
+  .active:after, .active:hover:after {
+    position: absolute;
+    content: " ";
+    display: block;
+    bottom: -1;
+    width: 100%;
+    z-index: 9;
+    border-bottom: 1px solid whitesmoke; }
+
+.hidden {
+  visibility: none;
+  display: none; }
+
+/*# sourceMappingURL=lexicon.css.map */
