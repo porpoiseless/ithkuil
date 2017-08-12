@@ -62,7 +62,6 @@ header.page-header {
   padding: 4px; }
 
 .lx-root, .lx-gloss {
-  display: inline-block;
   margin: 4px; }
 
 .lx-root:before {
@@ -79,23 +78,12 @@ header.page-header {
   /* grid-template-columns: repeat(2, 1fr) */
   /* grid-column-gap: 2px */ }
 
-.lx-designation, .lx-pattern, .lx-stem {
-  display: inline-block; }
-
 .lx-designation {
-  counter-reset: pattern;
-  display: grid;
-  grid-auto-flow: column;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  grid-row-gap: 4px;
-  grid-column-gap: 4px; }
+  counter-reset: pattern; }
 
 .lx-pattern {
   padding: 0;
   margin: 0;
-  display: flex;
-  flex-direction: column;
   counter-reset: stem; }
   .lx-pattern:before {
     counter-increment: pattern;
