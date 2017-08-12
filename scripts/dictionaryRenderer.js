@@ -1,3 +1,95 @@
+function IthkuilRoot(obj) {
+    //
+    this.gloss = obj.gloss;
+    this.root = obj.root;
+    this.table = obj.table;
+    this.derived = obj.derived;
+
+    return this;
+};
+
+Object.defineProperty(IthkuilRoot.prototype, "stems", {
+    get: function() {
+        return this.table.reduce(
+            function(a,b){
+                return a.concat(b);
+            }).reduce(
+                function(a,b){
+                    return a.concat(b);});
+    }
+});
+
+const Dictionary = {
+    entries: ROOT_INDEX.map(function(o) {return new IthkuilRoot(o)}),
+    search: function(field, searchTerm){
+              // function to test a string based on the given regexp
+              function testString(str) {
+                  var term = new RegExp(searchTerm, "i");
+                  return term.test(str);
+              };
+              // 
+              function searchTest(entry) {
+                  // if the field is an array, test to see if any elements contain term
+                  var fieldData = entry[field];
+                  if (fieldData instanceof Array) {
+                      return fieldData.some(testString);
+                  } else {
+                      return testString(fieldData);
+                  };
+              };
+              // 
+              return this.entries.filter(searchTest);
+          }
+};
+
+Ithkuil = {};
+Ithkuil.fns = {
+  "stative": [
+    "(a)",
+    "e",
+    "u",
+    "o",
+    "ö",
+    "î/û",
+    "â",
+    "ê",
+    "ô"
+  ],
+  "dynamic": [
+    "i",
+    "ai",
+    "ei",
+    "au",
+    "eu",
+    "iu",
+    "ia/ua",
+    "ie/ue",
+    "io/uo"
+  ],
+  "manifestive": [
+    "ui",
+    "ü/ou",
+    "ëi",
+    "ae",
+    "ea",
+    "oa",
+    "üa/aì",
+    "iù/uì",
+    "iö/uö"
+  ],
+  "descriptive": [
+    "oi",
+    "eo",
+    "eö",
+    "oe",
+    "öe",
+    "ëu",
+    "üo/oì",
+    "üe/eì",
+    "üö/aù"
+  ]
+}
+
 window.onload = renderDictionary;
 
 function renderDictionary() {
@@ -257,96 +349,4 @@ function renderSearchBar() {
     form.className = "search-bar";
     return form
 
-}
-
-function IthkuilRoot(obj) {
-    //
-    this.gloss = obj.gloss;
-    this.root = obj.root;
-    this.table = obj.table;
-    this.derived = obj.derived;
-
-    return this;
-};
-
-Object.defineProperty(IthkuilRoot.prototype, "stems", {
-    get: function() {
-        return this.table.reduce(
-            function(a,b){
-                return a.concat(b);
-            }).reduce(
-                function(a,b){
-                    return a.concat(b);});
-    }
-});
-
-const Dictionary = {
-    entries: ROOT_INDEX.map(function(o) {return new IthkuilRoot(o)}),
-    search: function(field, searchTerm){
-              // function to test a string based on the given regexp
-              function testString(str) {
-                  var term = new RegExp(searchTerm, "i");
-                  return term.test(str);
-              };
-              // 
-              function searchTest(entry) {
-                  // if the field is an array, test to see if any elements contain term
-                  var fieldData = entry[field];
-                  if (fieldData instanceof Array) {
-                      return fieldData.some(testString);
-                  } else {
-                      return testString(fieldData);
-                  };
-              };
-              // 
-              return this.entries.filter(searchTest);
-          }
-};
-
-Ithkuil = {};
-Ithkuil.fns = {
-  "stative": [
-    "(a)",
-    "e",
-    "u",
-    "o",
-    "ö",
-    "î/û",
-    "â",
-    "ê",
-    "ô"
-  ],
-  "dynamic": [
-    "i",
-    "ai",
-    "ei",
-    "au",
-    "eu",
-    "iu",
-    "ia/ua",
-    "ie/ue",
-    "io/uo"
-  ],
-  "manifestive": [
-    "ui",
-    "ü/ou",
-    "ëi",
-    "ae",
-    "ea",
-    "oa",
-    "üa/aì",
-    "iù/uì",
-    "iö/uö"
-  ],
-  "descriptive": [
-    "oi",
-    "eo",
-    "eö",
-    "oe",
-    "öe",
-    "ëu",
-    "üo/oì",
-    "üe/eì",
-    "üö/aù"
-  ]
 }

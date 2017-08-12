@@ -1,0 +1,444 @@
+#+property: header-args:haml :tangle ./templates/index.html.haml
+#+property: header-args:javascript :tangle ./scripts/dictionaryRenderer.js
+#+title: Generator for Ithkuil Root List
+* Templates
+Ithkuil dictionary template
+#+BEGIN_SRC haml
+!!! 5
+%html
+  %head
+    %title= "Ithkuil Dictionary | Interactive Listing of Ithkuil Roots"
+    %meta{charset: "utf-8"}
+    %link{href:"./styles/dictionary.css", type:"text/css", rel:"stylesheet"}
+    %script{src:"./data/dictionary.js"}
+    %script{src:"./scripts/dictionaryRenderer.js"}
+  %body
+    %header.page-header
+      %h1 Ithkuil Dictionary
+      %p Interactive listing of Ithkuil roots, stems, & derivatives
+    %main.content-wrapper
+      
+#+END_SRC
+** haml to html
+#+BEGIN_SRC sh :tangle no
+haml ./templates/index.html.haml > index.html
+
+#+END_SRC
+
+
+
+* Scripts
+** Ithkuil domain specific classes
+*** IthkuilRoot
+**** Constructor
+#+BEGIN_SRC javascript
+  function IthkuilRoot(obj) {
+      //
+      this.gloss = obj.gloss;
+      this.root = obj.root;
+      this.table = obj.table;
+      this.derived = obj.derived;
+
+      return this;
+  };
+#+END_SRC
+**** Getter for stems
+#+BEGIN_SRC javascript
+  Object.defineProperty(IthkuilRoot.prototype, "stems", {
+      get: function() {
+          return this.table.reduce(
+              function(a,b){
+                  return a.concat(b);
+              }).reduce(
+                  function(a,b){
+                      return a.concat(b);});
+      }
+  });
+
+#+END_SRC
+*** Dictionary
+#+BEGIN_SRC javascript
+  const Dictionary = {
+      entries: ROOT_INDEX.map(function(o) {return new IthkuilRoot(o)}),
+      search: function(field, searchTerm){
+                // function to test a string based on the given regexp
+                function testString(str) {
+                    var term = new RegExp(searchTerm, "i");
+                    return term.test(str);
+                };
+                // 
+                function searchTest(entry) {
+                    // if the field is an array, test to see if any elements contain term
+                    var fieldData = entry[field];
+                    if (fieldData instanceof Array) {
+                        return fieldData.some(testString);
+                    } else {
+                        return testString(fieldData);
+                    };
+                };
+                // 
+                return this.entries.filter(searchTest);
+            }
+  };
+ 
+
+
+#+END_SRC
+*** Ithkuil
+#+BEGIN_SRC javascript
+  Ithkuil = {};
+  Ithkuil.fns = {
+    "stative": [
+      "(a)",
+      "e",
+      "u",
+      "o",
+      "ö",
+      "î/û",
+      "â",
+      "ê",
+      "ô"
+    ],
+    "dynamic": [
+      "i",
+      "ai",
+      "ei",
+      "au",
+      "eu",
+      "iu",
+      "ia/ua",
+      "ie/ue",
+      "io/uo"
+    ],
+    "manifestive": [
+      "ui",
+      "ü/ou",
+      "ëi",
+      "ae",
+      "ea",
+      "oa",
+      "üa/aì",
+      "iù/uì",
+      "iö/uö"
+    ],
+    "descriptive": [
+      "oi",
+      "eo",
+      "eö",
+      "oe",
+      "öe",
+      "ëu",
+      "üo/oì",
+      "üe/eì",
+      "üö/aù"
+    ]
+  }
+
+#+END_SRC
+*** 
+** Initialize Dictionary
+#+BEGIN_SRC javascript
+
+  window.onload = renderDictionary;
+
+  function renderDictionary() {
+      var content = document.querySelector(".content-wrapper");
+      var fragment = document.createDocumentFragment();
+      var search = renderSearchBar();
+      content.appendChild(search);
+      Dictionary.entries.forEach(function(entry) {
+          var node = renderDictionaryEntry(entry);
+          entry.node = node;
+          fragment.appendChild(node);
+      });
+
+      content.appendChild(fragment);
+  };
+#+END_SRC
+** Utilities
+*** elt
+Create elements with children and textnodes.
+#+BEGIN_SRC javascript
+  function elt(tag) {
+      var node = document.createElement(tag);
+      for (var i = 1; i < arguments.length; i++) {
+          var child = arguments[i];
+          if (typeof child == "string")
+              child = document.createTextNode(child);
+          node.appendChild(child);
+      };
+      return node;
+  };
+
+#+END_SRC
+** rendering a root
+
+#+BEGIN_SRC javascript
+  function renderDictionaryEntry(entry) {
+      //
+      //
+      // get us a document fragment to package this up in
+      // unpack the entry
+      var root = entry.root;
+      var gloss = entry.gloss;
+      var table = entry.table;
+
+      function renderEntryHeader(root, gloss) {
+          // the root
+          var rootNode = elt("h1", root);
+          rootNode.className = "lx-root";
+          // the gloss
+          var glossNode = elt("p", gloss);
+          glossNode.className = "lx-gloss";
+          // the wrapper
+          var header = elt("header", rootNode, glossNode);
+          header.className = "lx-header";
+          header.id = root + "-header";
+          // 
+          return header;
+      };
+      //
+      function renderStemTable(tbl, root, gloss) {
+          var tabMap = {};
+          var tableWrapper = elt("div");
+          tableWrapper.className = "lx-table-wrapper";
+          for (var dsn in tbl) {
+              var dsnLabel = ["informal", "formal"][dsn];
+              var tbody = elt("tbody");
+              // 
+              var designation = elt("table", tbody);
+              designation.className = "lx-designation";
+              // 
+              var designationId = [root, dsnLabel].join("-");
+              designation.id = designationId;
+              //
+              // add the dsnLabel to our tab map, along with the designation node
+              tabMap[dsnLabel] = designation;
+              // for each pattern...
+              for (var ptn in tbl[dsn]) {
+                  // make a container for it
+                  // var pattern = createEl("div");
+                  var ptnLabel = ptn;
+                  var ptnNum = (1 * ptn) + 1;
+                  var patternId = [designationId, "pattern", ptnLabel]
+                      .join("-");
+                  // setProperty(pattern, "className", "lx-pattern");
+                  // setProperty(pattern, "id", patternId);
+                  var patternLabel = elt("th", "Ptn. " + ptnNum);
+                  var pattern = elt("tr", patternLabel);
+                  pattern.id = patternId;
+                  tbody.appendChild(pattern);
+                  // for each stem
+                  for (var s in tbl[dsn][ptn]) {
+                      // locate the stem's gloss
+                      var stemGloss = tbl[dsn][ptn][s];
+                      // 
+                      var stem = elt("td");
+                      // give it a class for styling & DOM manipulation purposes
+                      stem.className = "lx-stem " + "pattern-"
+                          + ptn + " stem-" + s;
+                      // put the data on the node
+                      stem.setAttribute("ithkuil-designation", dsn);
+                      stem.setAttribute("ithkuil-pattern", ptn);
+                      stem.setAttribute("ithkuil-stem", s);
+                      for (var fn in Ithkuil.fns) {
+                          var rowMajor = (1 * s) + (3 * ptn);
+                          var vowel = Ithkuil.fns[fn][rowMajor];
+                          var instantiatedStem = vowel + root.toLowerCase();
+                          dsn == 0 ? undefined : instantiatedStem += "á";
+                          stem.setAttribute("ithkuil-" + fn, instantiatedStem);
+                      };
+                      // 
+                      var stemP = elt("p");
+                      stemP.textContent = stemGloss;
+                      var stemLabel = s;
+                      var stemId = [patternId, "stem", stemLabel]
+                          .join("-");
+                      stem.id = stemId;
+                      stem.appendChild(stemP);
+                      // pattern.appendChild(stem);
+                      pattern.appendChild(stem);
+                  };
+                  // designation.appendChild(pattern);
+              };
+              tableWrapper.appendChild(designation);
+          };
+          var tabs = new TabBar(tabMap).init();
+          var nav = tabs.node;
+          tableWrapper.prepend(nav);
+          return tableWrapper;
+      }
+      function renderDerivedRoots(derivedRoots) {
+          var minorWrapper = elt("div");
+          minorWrapper.className = "lx-minorRoots-wrapper";
+
+          var minorHeading = elt("h2", "Roots patterned after -" + root + "-");
+          minorHeading.className = "lx-minorRoots-heading";
+
+          minorWrapper.appendChild(minorHeading);
+          var derivedRootsList = elt("ul");
+          derivedRootsList.className = "lx-minorRoots-list";
+
+          for (var derivedRoot in derivedRoots) {
+              var dr = elt("li", derivedRoots[derivedRoot]);
+              dr.className = "lx-minorRoots-item";
+              derivedRootsList.appendChild(dr);
+          };
+          minorWrapper.appendChild(derivedRootsList);
+          return minorWrapper;
+      }
+      var header = renderEntryHeader(root, gloss);
+      var stemTable = renderStemTable(table, root, gloss);
+      var wrapper = elt("div", header, stemTable);
+      wrapper.className = "lx-wrapper stative";
+      wrapper.id = root + "-wrapper";
+      if (entry.derived) {
+          wrapper.appendChild(
+              renderDerivedRoots(entry.derived));
+      };
+      return wrapper;
+  };
+#+END_SRC
+** Making a Tab Bar
+This is a pretty minimal implementation, but it gets the job done.
+**** Make a single tab
+the tab creates an html element to represent itself and provides an interface consisting of:
+ - the label
+ - the tab's html node
+ - the tab's target node
+#+BEGIN_SRC javascript
+function Tab(label, target){
+    var node = document.createElement("li");
+    node.className = "tab-item";
+    node.textContent = label;
+
+    this.label = label;
+    this.node = node;
+    this.target = target;
+
+    return this;
+
+};
+#+end_src
+
+***** Tab methods:
+In addition to the above interface, we can tell the tab to activate or deactivate itself
+****** Activate
+to activate, the tab gives its node the class active, and removes the hidden class from its target.
+#+BEGIN_SRC javascript
+
+// 
+Tab.prototype.activate = function(){
+    this.node.classList.add("active");
+    this.target.classList.remove("hidden");
+    return this;
+};
+//
+#+end_src
+****** Deactivate
+As above, but in reverse: this method removes the active class from its own node, and adds the hidden class to its target.
+#+BEGIN_SRC javascript
+
+Tab.prototype.deactivate = function(){
+    this.node.classList.remove("active");
+    this.target.classList.add("hidden");
+    return this;
+};
+//
+#+end_src
+**** A whole bar of tabs
+Obviously one tab doesn't do much good on its own--then it's basically a drawer.
+A whole row of tabs, restricting a view to one active tab & one associated visible content item at a time, is what we're after.
+#+BEGIN_SRC javascript
+
+  function TabBar(map) {
+      var self = this;
+      var fragment = document.createDocumentFragment();
+
+        var wrapper = document.createElement("nav");
+        wrapper.className = "tab-bar";
+
+        var list = document.createElement("ul");
+        list.className = "tab-list";
+
+        wrapper.appendChild(list);
+        fragment.appendChild(wrapper);
+
+        var tabs = [];
+
+        for (var key in map) {
+            var tab = new Tab(key, map[key]);
+            var node = tab.node;
+            // place the tab's list item in the tab bar's list node
+            list.appendChild(node);
+            node.addEventListener("click", (function(theTab) {
+                return function() {
+                    self.reset();
+                    theTab.activate();
+                };
+            })(tab));
+
+            // add it to our collection of Tab objects
+            tabs.push(tab);
+        };
+      this.node = fragment;
+      this.tabs = tabs;
+      return this;
+
+    };
+#+end_src
+***** Resetting a tab bar
+Deactivate all tabs.
+#+BEGIN_SRC javascript
+  TabBar.prototype.reset = function() {
+      this.tabs.forEach(function(tab) {
+          tab.deactivate();
+      });
+      return this;
+  };
+#+END_SRC
+***** Initializing a tab bar
+Make the first tab active.
+#+BEGIN_SRC javascript
+  TabBar.prototype.init = function() {
+      this.reset();
+      this.tabs[0].activate();
+      return this;
+  }
+    
+#+end_src
+*** search
+#+BEGIN_SRC javascript
+  function renderSearchBar() {
+      var searchBox = elt("input");
+    
+      var gloss = elt("option", "gloss");
+      var root = elt("option", "root");
+      var derived = elt("option", "derived");
+      var stems = elt("option", "stems");
+
+      var select = elt("select", gloss, root, stems, derived);
+      // add event listeners
+      searchBox.addEventListener("keyup", search);
+      select.addEventListener("change", search);
+      // 
+      function dictionarySearch(field, value) {
+          var results = Dictionary.search(field, value);
+          Dictionary.entries.forEach(function(entry) {
+              entry.node.classList.add("hidden");
+          });
+          results.forEach(function(entry) {
+              entry.node.classList.remove("hidden");
+          })
+      };
+
+      function search() {
+          dictionarySearch(select.value, searchBox.value);
+      };
+      var form = elt("form", searchBox, select);
+      form.className = "search-bar";
+      return form
+    
+  }
+
+#+END_SRC
