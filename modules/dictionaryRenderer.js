@@ -1,24 +1,19 @@
-function IthkuilRoot(obj) {
-    //
-    this.gloss = obj.gloss;
-    this.root = obj.root;
-    this.table = obj.table;
-    this.derived = obj.derived;
+const concatReduce = (a, b) => a.concat(b);
 
-    return this;
-};
+const flattenTable = table => table.reduce(concatReduce).reduce(concatReduce);
 
-Object.defineProperty(IthkuilRoot.prototype, "stems", {
-    get: function() {
-        return this.table.reduce(
-            function(a,b){
-                return a.concat(b);
-            }).reduce(
-                function(a,b){
-                    return a.concat(b);});
+class IthkuilRoot {
+    constructor ({gloss, root, table, derived}) {
+	this.gloss = gloss;
+	this.root = root;
+	this.table = table;
+	this.derived = derived;
     }
-});
-
+    get stems () {
+	return flattenTable(this.table);
+    }
+}
+// 
 const Dictionary = {
     entries: ROOT_INDEX.map(function(o) {return new IthkuilRoot(o)}),
     search: function(field, searchTerm){
@@ -326,8 +321,9 @@ function renderSearchBar() {
     var root = elt("option", "root");
     var derived = elt("option", "derived");
     var stems = elt("option", "stems");
+    var all = elt("option", "all")
 
-    var select = elt("select", gloss, root, stems, derived);
+    var select = elt("select", gloss, root, stems, derived, all);
     // add event listeners
     searchBox.addEventListener("keyup", search);
     select.addEventListener("change", search);
