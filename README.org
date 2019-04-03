@@ -1,1 +1,3 @@
 #+TITLE: Readme
+* Ithkuil lexicon
+This project consists of a scraper to extract and organize lexicon information and a simple page to display and search it.
