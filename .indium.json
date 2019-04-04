@@ -4,7 +4,7 @@
             "name": "Test server",
             "type": "chrome",
 	    "root": "public",
-	    "url": "http://localhost:3000"
+	    "url": "http://localhost:3000/data/lexicon.html"
         }
     ]
 }

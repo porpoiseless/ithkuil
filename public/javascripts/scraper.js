@@ -115,11 +115,11 @@ function handleRootAndGloss(str) {
 };
 
 const cleanGloss = gloss => gloss.replace(/^\W*|\W*$/g, "")
-      .replace(/\s\s+/g, " ")			// remove extraneous space
+      .replace(/\s\s+/g, " ")	// remove extraneous space
       .toLowerCase();
 
-cibst isTableHeader = str => /^(\s*(((in)?formal)|(complementary))\s*(stems?)?)?\s*$/i
-    .test(str);
+const isTableHeader = str =>
+      /^(\s*(((in)?formal)|(complementary))\s*(stems?)?)?\s*$/i.test(str);
 
 function isRowTableHeader(ary) {
     if (ary.map(isTableHeader)
