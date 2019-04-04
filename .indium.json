@@ -3,7 +3,7 @@
         {
             "name": "Test server",
             "type": "chrome",
-	    "root": "public"
+	    "root": "public",
 	    "url": "http://localhost:3000"
         }
     ]

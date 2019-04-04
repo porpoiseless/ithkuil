@@ -1,50 +1,22 @@
-function containsNewline(str) {
-    if (str.search(/$/m) == -1){
-	return false;
-    }else{
-	return true;
-    };
-};
-
-function notJustSpace(str) {
-    if (str.search(/\S/) == -1){
-        return false;
-    }else{
-        return true;
-    };
-};
-
+import {IthkuilRoot} from '../javascripts/modules/IthkuilRoot.mjs'
+// does a strinc contain a more than one newline at the end?
+const hasNewLine = str => str.search(/$/m) == -1 ? false : true;
+// does a string contain meaningful characters?
+const hasContent = str => /\S/.test(str);
 // get a node's text
-function text(node) {
-    return node.textContent;
-};
-
-function isDerivedRoot(text) {
-    if (text.search(/pattern of stems|patterned/i) === -1) {
-        return false;
-    } else {
-        return true;
-    };
-}
-
-function allDerivedRoots() {
-    var allP = [].slice.call(
-        document.querySelectorAll('p'));
-    var filtered = allP.filter(function(node) {
-        return isDerivedRoot(text(node));
-    });
-    var ret = filtered.map(text);
-    // filtered.forEach(function(node) {
-    //     document.body.removeChild(node);
-    // });
-    return ret;
-};
+const text = el => el.textContent;
+// is it a derived root?
+const isDerivedRoot = text => /pattern(?:ed| of stems)/i.test(text);
+// extract the text of all derived roots 
+const allDerivedRoots = () => Array.from(document.querySelectorAll("p"))
+      .filter( el => isDerivedRoot(text(el)))
+      .map(text);
 
 function checkCombinedEntry(pText) {
     // if it contains a newline...
-    if (containsNewline(pText)){
+    if (hasNewLine(pText)){
         // split it, eliminating strings consisting only of whitepace
-        var potentials = pText.split(/$/m).filter(notJustSpace);
+        var potentials = pText.split(/$/m).filter(hasContent);
         // returns an array if there is more than one interesting string 
         if (potentials.length > 1) {
             return potentials;
@@ -112,22 +84,9 @@ function derivedRoots() {
             "orphans": orphans}
 };
 
-function isRootTable(tableNode) {
-    if (tableNode.querySelector('tr').textContent.search(/^\s*-?\s*\S+?\s*-/) === -1) {
-        return false;
-    } else {
-        return true;
-    };
-};
 
-function allTableRoots() {
-    // get all <TABLE>
-    var allTables = [].slice.call(document.querySelectorAll('table'));
-    // quick and dirty test to see if it's a root table
-
-    return allTables.filter(isRootTable);
-
-};
+const isRootTable = tbl => /^\s*-?\s*\S+?\s*-/.test(tbl.querySelector('tr').textContent);
+const allTableRoots = () => Array.from(document.querySelectorAll('table')).filter(isRootTable);
 
 function tableToRowArray(tbl) {
     var rows = [].slice.call(tbl.querySelectorAll('tr'));
@@ -155,17 +114,12 @@ function handleRootAndGloss(str) {
 
 };
 
-function cleanGloss(gloss) {
-    var clean = gloss.replace(/^\W*|\W*$/g, "") // remove quotes
-        .replace(/\s\s+/g, " ")			// remove extraneous space
-        .toLowerCase();				// lowercase it
-    return clean;
-}
+const cleanGloss = gloss => gloss.replace(/^\W*|\W*$/g, "")
+      .replace(/\s\s+/g, " ")			// remove extraneous space
+      .toLowerCase();
 
-function isTableHeader(str){
-    var searchPattern = /^(\s*(((in)?formal)|(complementary))\s*(stems?)?)?\s*$/i;
-    return searchPattern.test(str);
-}
+cibst isTableHeader = str => /^(\s*(((in)?formal)|(complementary))\s*(stems?)?)?\s*$/i
+    .test(str);
 
 function isRowTableHeader(ary) {
     if (ary.map(isTableHeader)
@@ -216,26 +170,7 @@ function makeIthkuilRoot(rowArray) {
 }
 
 
-function IthkuilRoot(obj) {
-    //
-    this.gloss = obj.gloss;
-    this.root = obj.root;
-    this.table = obj.table;
-    this.derived = obj.derived;
 
-    return this;
-};
-
-Object.defineProperty(IthkuilRoot.prototype, "stems", {
-    get: function() {
-        return this.table.reduce(
-            function(a,b){
-                return a.concat(b);
-            }).reduce(
-                function(a,b){
-                    return a.concat(b);});
-    }
-})
 
 function parseStemTable(table) {
     // make an empty stem table
@@ -243,7 +178,7 @@ function parseStemTable(table) {
         var stems = [];
         for (var dsn = 0; dsn < 2; dsn++) {
             var designation = [];
-            for (pattern = 0; pattern < 3; pattern++) {
+            for (let pattern = 0; pattern < 3; pattern++) {
                 designation.push(new Array(3));
             };
             stems.push(designation);
@@ -307,7 +242,7 @@ function parseStemTable(table) {
 }
 // makes an empty StemTable
 
-var Ithkuil = {
+window.Ithkuil = {
     DICTIONARY: {
         entries: allTableRoots().map(tableToRowArray)
             .map(makeIthkuilRoot),
