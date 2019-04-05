@@ -1,15 +1,26 @@
-// SCRAPER COMPONENTS
-// 
-// ---- GENERAL UTILITIES ----
-//
-// 
+#+property: header-args:js :tangle ../public/javascripts/modules/scraper.mjs
+#+title: Modular Scraper for Ithkuil.net
+* Scraper components
+I'm rewriting the whole shebang in a more functional (and therfore, I
+hope, more reproducible) style. We'll see how it goes.
+
+** General utilities
+Small and widely useful snippets go here.
+
+*** Scraping text
+
+#+BEGIN_SRC js
+// get a node's text or the empty string
 const getText = el => el.textContent || "";
-// 
+// wrap the text and the node itself in an object
 const textAndElement = el => ({text: getText(el),
 			       node: el});
-//
-// ---- ROOT TABLE UTILITIES ----
-// 
+#+END_SRC
+
+** Scraping root tables
+
+*** Root table utilities
+#+BEGIN_SRC js
 // Root tables have a <strong> element in the first row
 const getTableRoot = tbl => tbl.querySelector("tr").querySelector("strong");
 // Get root text
@@ -19,14 +30,18 @@ const getTableGlossText = tbl => getText(getTableRoot(tbl).nextSibling);
 // Collect all root tables from page
 const getAllRootTables = doc => Array.from(doc.querySelectorAll("table"))
       .filter(getTableRoot);
-//
+#+END_SRC
+
+*** Destructuring a table
+#+BEGIN_SRC js
 
 const tableToArray = tbl => Array.from(tbl.querySelectorAll("tr")) // table => array of rows...
       .map( tr => Array.from(tr.querySelectorAll("td"))	// row => array of cells
 	    .map(textAndElement));				// cell => {text, element}
-//
-// ---- DERIVED ROOT UTILITIES ----
-//
+#+END_SRC
+
+** Scraping derived roots
+#+BEGIN_SRC js
 const rootRegExp = /-? ?([^0-9: ]{1,6}) ?-?/;
 
 Array.from(document.querySelectorAll("strong"))
@@ -36,10 +51,10 @@ Array.from(document.querySelectorAll("strong"))
     .map(strong => ({root: strong.textContent,
 		     gloss: strong.nextSibling.textContent,
 		     major: strong.nextElementSibling.textContent}));
+#+END_SRC
 
-//
-// ---- LEXICON SCRAPER CLASS ----
-// 
+** Behold, the scraper!
+#+BEGIN_SRC js
 class LexiconScraper {
     constructor (page) {
 	this.page = page;
@@ -58,3 +73,4 @@ class LexiconScraper {
 
 window.Lexicon = new LexiconScraper(document);
 	
+#+END_SRC

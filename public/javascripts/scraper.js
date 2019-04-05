@@ -121,14 +121,7 @@ const cleanGloss = gloss => gloss.replace(/^\W*|\W*$/g, "")
 const isTableHeader = str =>
       /^(\s*(((in)?formal)|(complementary))\s*(stems?)?)?\s*$/i.test(str);
 
-function isRowTableHeader(ary) {
-    if (ary.map(isTableHeader)
-        .includes(false)){
-        return false;
-    } else {
-        return true;
-    }
-}
+const isRowTableHeader = trArray => trArray.every(isTableHeader);
 
 // a utility for going over a table
 function walkTable(tbl, callback) {
