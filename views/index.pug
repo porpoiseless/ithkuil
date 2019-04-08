@@ -2,6 +2,10 @@ extends layout
 
 block content
   header(class='page-header')
-    h1= title
-    p Interactive listing of Ithkuil roots, stems, & derivatives.
+    img(src="/images/masthead.svg"
+        width="128"
+	id="masthead"
+	alt="-l- P1S2 FML CPN COA N")
+    h1(class='page-title')= title
+    p(class='page-subtitle')= subtitle
   main(class='content-wrapper')
