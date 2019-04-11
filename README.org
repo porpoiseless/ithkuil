@@ -1,3 +1,11 @@
 #+TITLE: Readme
-* Ithkuil lexicon
+* Ithkuil dictionary
 This project consists of a scraper to extract and organize lexicon information and a simple page to display and search it.
+* Scraper
+The [[file:literate/scraper_modules.org][Scraper ]]runs against the following files to assemble an almost complete lexicon of Ithkuil roots:
+- [[file:./scraper/data/lexicon.html][The Lexicon]]
+- [[file:./scraper/data/lexicon_supplement_1.html][The Lexicon Supplement]]
+* Dictionary
+The dictionary currently displays most of the roots from the original lexicon page.
+A new page is in progress with some updated styling.
+
