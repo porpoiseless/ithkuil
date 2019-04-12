@@ -1,5 +1,7 @@
-#+property: header-args:js :tangle ../public/javascripts/modules/scraper.mjs
+#+property: header-args:js :tangle ../scraper/LexiconScraper.js :comments both
+
 #+title: Modular Scraper for Ithkuil.net
+* Using Puppeteer
 * Scraper components
 I'm rewriting the whole shebang in a more functional (and therfore, I
 hope, more reproducible) style. We'll see how it goes.
@@ -15,9 +17,6 @@ Small and widely useful snippets go here.
   // wrap the text and the node itself in an object
   const textAndElement = el => ({text: getText(el),
                                  node: el});
-#+END_SRC
-
-#+BEGIN_SRC js
   // get the following sibling
   const nextSibling = el => el.nextSibling || false;
   // get the following element sibling
@@ -29,44 +28,128 @@ Small and widely useful snippets go here.
         getText(nextElementSibling(el)) : false;
 #+END_SRC
 
+*** Concatenate all subsequent text nodes
 #+BEGIN_SRC js
-    // get all following text nodes until the next element
-    function slurpTextNodes (start) {
-        let slurpedText = "", next = nextSibling(start);
-        while (next.nodeType &&
-               (next.nodeType == Node.TEXT_NODE || next.nodeName == "EM")) {
-            slurpedText += next.textContent;
-            next = nextSibling(next)
-        }
-        return slurpedText;
-    }
+  // get all following text nodes until the next element
+  function slurpTextNodes (start) {
+      let slurpedText = "", next = nextSibling(start);
+      while (next.nodeType &&
+             (next.nodeType == Node.TEXT_NODE ||
+              next.nodeName == "EM" ||
+              next.nodeName == "STRONG")) {
+          slurpedText += next.textContent;
+          next = nextSibling(next);
+      }
+      return slurpedText;
+  }
 #+END_SRC
-
-**** TODO tree cutting function
-
 ** Scraping root tables
-
-*** Root table utilities
-#+BEGIN_SRC js
-// Root tables have a <strong> element in the first row
-const getTableRoot = tbl => tbl.querySelector("tr").querySelector("strong");
-// Get root text
-const getTableRootText = tbl => getText(getTableRoot(tbl));
-// Gloss strings should immediately follow the root as a text node
-const getTableGlossText = tbl => getText(getTableRoot(tbl).nextSibling);
-// Collect all root tables from page
-const getAllRootTables = doc => Array.from(doc.querySelectorAll("table"))
-      .filter(getTableRoot);
-#+END_SRC
 
 *** Destructuring a table
 #+BEGIN_SRC js
+  // turn an HTML table into an array of cells
+  const tableToArray = tbl => [...tbl.querySelectorAll("tr")].map( // get rows
+      tr => [...tr.querySelectorAll("td")]			 // get the cells
+          .map(getText)		// get the text
+          .filter(o=>o));		// discard empties
+#+END_SRC
+*** Walk a table
+#+BEGIN_SRC js
+  // callback takes:
+  // 1. item in the table
+  // 2. row index of the item
+  // 3. column index
+  // 4. the table itself
+  const walkTable = (tbl, callback) => tbl.forEach(
+      (row, rowIndex) => row.forEach(
+          (col, colIndex) => callback(tbl[rowIndex][colIndex],
+                                      rowIndex,
+                                      colIndex,
+                                      tbl)));
+#+END_SRC
+*** Root table utilities
+#+BEGIN_SRC js
+  // Root tables have a <strong> element in the first row
+  const getTableRoot = tbl => tbl.querySelector("tr").querySelector("strong");
+  // Get root text
+  const getTableRootText = tbl => getText(getTableRoot(tbl));
+  // Gloss strings should immediately follow the root as a text node
+  const getTableGlossText = tbl => slurpTextNodes(getTableRoot(tbl));
+  // Collect all root tables from page
+  const getAllRootTables = doc => Array.from(doc.querySelectorAll("table"))
+        .filter(getTableRoot);
+  // is a cell a table header 
+  const tableHeaderRegExp = /\s*(?:(?:(?:in)?formal)|(?:compleme.tary))\s*(?:stems?)?\s*$/i;
+  // filters out table headers
+  const tableHeaderFilter = row => row.every(str => ! tableHeaderRegExp.test(str));
+  // check if a string is a note
+  const noteRegExp = /^\s*note:\s*/i;
+  // remove leading and trailing garbage and eliminate extra spaces
+  const cleanText = txt => txt.replace(/^[0-9\s-–]\.?\s*|[\s-–]\s*$/i, "").
+        replace(/\s+/g, " ");
+  // clean up an array-table for processing
+  const stripTable = tbl => tbl.filter(tableHeaderFilter);
+#+END_SRC
+*** StemTableFactory (makes table and setter) 
+#+BEGIN_SRC js
+  const StemTableFactory = () => ({
+      table: [[Array(3), Array(3), Array(3)],
+              [Array(3), Array(3), Array(3)]],
+      set: function ({gloss, designation, pattern, stem}) {
+          this.table[designation][pattern][stem] = gloss;
+          return this;
+      }
+  });
+#+END_SRC
+*** Handle holistic and complementary stems
+#+BEGIN_SRC js
+  // input is a table in array form
+  // output object is a stemtable with it's addressing method
+  const handleHolisticStems = (input, output) =>
+        walkTable(input, (gloss, row, col, tbl) =>
+                  output.set({gloss: gloss,
+                              stem: row,
+                              pattern: 0,
+                              designation: col % 2}));
+  // complementary stems have a more varied structure: half width and full width,
+  // plus (easier to handle) variation in number of rows
+  const handleComplementaryStems = (input, output) =>
+        walkTable(input, (gloss, row, col, tbl) => tbl[row].length > 2 ?
+                  output.set({gloss: gloss,
+                              stem: row,
+                              pattern: col % 2 + 1,
+                              designation: col > 2 ? 1 : 0}) :
+                  output.set({gloss: gloss,
+                              stem: row,
+                              pattern: col % 2 + 1,
+                              designation: col % 2}));
 
-const tableToArray = tbl => Array.from(tbl.querySelectorAll("tr")) // table => array of rows...
-      .map( tr => Array.from(tr.querySelectorAll("td"))	// row => array of cells
-	    .map(textAndElement));				// cell => {text, element}
 #+END_SRC
 
+*** Make Ithkuil root factory
+#+BEGIN_SRC js
+  const IthkuilRootFactory = (table) => {
+      // populate our return object
+      let output = {gloss: cleanText(getTableGlossText(table)),
+                    root: cleanText(getTableRootText(table))};
+      // make a stemtable object to sort data from html tables
+      let stems = StemTableFactory();
+      // turn the table into an array
+      let tblArray = stripTable(tableToArray(table).slice(1));
+      // extract a leading "note: " row
+      if (noteRegExp.test(tblArray[0][0])) {
+          output.note = tblArray[0][0];
+          tblArray = tblArray.slice(1);
+      };
+      // the first three rows are holistic stems
+      handleHolisticStems(tblArray.slice(0,3), stems);
+      // everything after is complementary
+      handleComplementaryStems(tblArray.slice(3), stems);
+      // pack the finished table into our result  
+      output.table = stems.table;
+      return output;
+  };
+#+END_SRC
 ** Scraping derived roots
 #+BEGIN_SRC js
   // regexp describing a root
@@ -104,6 +187,12 @@ const tableToArray = tbl => Array.from(tbl.querySelectorAll("tr")) // table => a
   };
 #+END_SRC
 
+*** Finish processing derived roots
+#+BEGIN_SRC js
+  const processDerivedRoot = el => guessMajorRoot(extractDerivedRoot(el))
+
+#+END_SRC
+
 *** Organize derived roots
   designed to be an accumulator
   1. accumulator
@@ -112,6 +201,9 @@ const tableToArray = tbl => Array.from(tbl.querySelectorAll("tr")) // table => a
   4. +source array+
 
 #+BEGIN_SRC js
+    // designed to be an accumulator
+    // 1. accumulator
+    // 2. current value
   const derivedRootReducer = (acc={index:{},orphans:[]}, item) => {
       const index=acc.index, orphans=acc.orphans, major=item.major;
       if (item.root && major) {    // if we have a candidate for the derived and major roots 
@@ -130,26 +222,18 @@ const tableToArray = tbl => Array.from(tbl.querySelectorAll("tr")) // table => a
 ** Behold, the scraper!
 
 #+BEGIN_SRC js
-
-  class LexiconScraper {
-      constructor (page) {
-          this.allRootTables = LexiconScraper.rootTables(page);
-          this.allDerivedRoots = LexiconScraper.derivedRoots(page);
+  let LexiconScraper = {
+      major: [],
+      derived: {index: {},
+                orphans: []},
+      scrape: function (doc) {
+          this.derived = getAllDerivedRoots(doc)	// get derived roots on page
+              .map(processDerivedRoot) // parse into objects 
+              .reduce(derivedRootReducer, this.derived); // reduce by major root
+          this.major = this.major.concat(getAllRootTables(document).map(IthkuilRootFactory));
+          return this;
       }
-      static rootTables (page) {
-          return getAllRootTables(page)
-              .map(tbl => ({root: getTableRootText(tbl),
-                            gloss: getTableGlossText(tbl),
-                            node: tbl}));
-      }
-      static derivedRoots (page) {
-          return getAllDerivedRoots(page).map(extractDerivedRoot)
-              .map(guessMajorRoot)
-              .reduce(derivedRootReducer, {index:{}, orphans:[]});
-      }
-  }
-  // inject 
-  window.Lexicon = new LexiconScraper(document);
+  };
 
-
+  window.Lexicon = LexiconScraper.scrape(document);
 #+END_SRC

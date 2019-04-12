@@ -1,10 +1,19 @@
 {
     "configurations": [
         {
-            "name": "Test server",
+            "name": "Dictionary",
             "type": "chrome",
 	    "root": "public",
-	    "url": "http://localhost:3000/data/lexicon.html"
-        }
+	    "url": "http://localhost:3000"
+        },
+	{
+	    "name": "Scraper",
+	    "type": "chrome",
+	    "root": "scraper",
+	    "scriptPathOverRides": {
+		"/static/(.*\\.js)": "/scraper/$1"
+	    },
+	    "url": "http://localhost:3000/static/data/lexicon.html"
+	}
     ]
 }
