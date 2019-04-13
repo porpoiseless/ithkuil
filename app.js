@@ -24,8 +24,8 @@ app.use(sassMiddleware({
   indentedSyntax: true, // true = .sass and false = .scss
   sourceMap: true
 }));
-app.use('/static', express.static(path.join(__dirname, 'public')));
-app.use('/static', express.static(path.join(__dirname, 'scraper')));
+app.use('/', express.static(path.join(__dirname, 'public')));
+app.use('/', express.static(path.join(__dirname, 'scraper')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);

@@ -225,7 +225,7 @@ const derivedRootReducer = (acc={index:{},orphans:[]}, item) => {
 
 
 // [[file:~/Projects/ithkuil/ithkuil/literate/scraper_modules.org::*Behold,%20the%20scraper!][Behold, the scraper!:1]]
-let LexiconScraper = {
+module.exports = {
     major: [],
     derived: {index: {},
               orphans: []},
@@ -237,6 +237,4 @@ let LexiconScraper = {
         return this;
     }
 };
-
-window.Lexicon = LexiconScraper.scrape(document);
 // Behold, the scraper!:1 ends here

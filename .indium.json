@@ -4,16 +4,15 @@
             "name": "Dictionary",
             "type": "chrome",
 	    "root": "public",
+	    "scriptPathOverRides": {
+		"/(.*\\.js)": "/scraper/$1"
+	    },
 	    "url": "http://localhost:3000"
         },
 	{
 	    "name": "Scraper",
-	    "type": "chrome",
-	    "root": "scraper",
-	    "scriptPathOverRides": {
-		"/static/(.*\\.js)": "/scraper/$1"
-	    },
-	    "url": "http://localhost:3000/static/data/lexicon.html"
+	    "type": "node",
+	    "command": "node ./scraper.js"
 	}
     ]
 }

@@ -222,7 +222,7 @@ Small and widely useful snippets go here.
 ** Behold, the scraper!
 
 #+BEGIN_SRC js
-  let LexiconScraper = {
+  module.exports = {
       major: [],
       derived: {index: {},
                 orphans: []},
@@ -235,5 +235,4 @@ Small and widely useful snippets go here.
       }
   };
 
-  window.Lexicon = LexiconScraper.scrape(document);
 #+END_SRC
