@@ -3,86 +3,86 @@ const concatReduce = (a, b) => a.concat(b);
 const flattenTable = table => table.reduce(concatReduce).reduce(concatReduce);
 
 class IthkuilRoot {
-    constructor ({gloss, root, table, derived}) {
-	this.gloss = gloss;
-	this.root = root;
-	this.table = table;
-	this.derived = derived;
+    constructor({ gloss, root, table, derived }) {
+        this.gloss = gloss;
+        this.root = root;
+        this.table = table;
+        this.derived = derived;
     }
-    get stems () {
-	return flattenTable(this.table);
+    get stems() {
+        return flattenTable(this.table);
     }
 }
 // 
 const Dictionary = {
-    entries: ROOT_INDEX.map(function(o) {return new IthkuilRoot(o)}),
-    search: function(field, searchTerm){
-              // function to test a string based on the given regexp
-              function testString(str) {
-                  var term = new RegExp(searchTerm, "i");
-                  return term.test(str);
-              };
-              // 
-              function searchTest(entry) {
-                  // if the field is an array, test to see if any elements contain term
-                  var fieldData = entry[field];
-                  if (fieldData instanceof Array) {
-                      return fieldData.some(testString);
-                  } else {
-                      return testString(fieldData);
-                  };
-              };
-              // 
-              return this.entries.filter(searchTest);
-          }
+    entries: ROOT_INDEX.map(function(o) { return new IthkuilRoot(o) }),
+    search: function(field, searchTerm) {
+        // function to test a string based on the given regexp
+        function testString(str) {
+            var term = new RegExp(searchTerm, "i");
+            return term.test(str);
+        };
+        // 
+        function searchTest(entry) {
+            // if the field is an array, test to see if any elements contain term
+            var fieldData = entry[field];
+            if (fieldData instanceof Array) {
+                return fieldData.some(testString);
+            } else {
+                return testString(fieldData);
+            };
+        };
+        // 
+        return this.entries.filter(searchTest);
+    }
 };
 
 Ithkuil = {};
 Ithkuil.fns = {
-  "stative": [
-    "(a)",
-    "e",
-    "u",
-    "o",
-    "ö",
-    "î/û",
-    "â",
-    "ê",
-    "ô"
-  ],
-  "dynamic": [
-    "i",
-    "ai",
-    "ei",
-    "au",
-    "eu",
-    "iu",
-    "ia/ua",
-    "ie/ue",
-    "io/uo"
-  ],
-  "manifestive": [
-    "ui",
-    "ü/ou",
-    "ëi",
-    "ae",
-    "ea",
-    "oa",
-    "üa/aì",
-    "iù/uì",
-    "iö/uö"
-  ],
-  "descriptive": [
-    "oi",
-    "eo",
-    "eö",
-    "oe",
-    "öe",
-    "ëu",
-    "üo/oì",
-    "üe/eì",
-    "üö/aù"
-  ]
+    "stative": [
+        "(a)",
+        "e",
+        "u",
+        "o",
+        "ö",
+        "î/û",
+        "â",
+        "ê",
+        "ô"
+    ],
+    "dynamic": [
+        "i",
+        "ai",
+        "ei",
+        "au",
+        "eu",
+        "iu",
+        "ia/ua",
+        "ie/ue",
+        "io/uo"
+    ],
+    "manifestive": [
+        "ui",
+        "ü/ou",
+        "ëi",
+        "ae",
+        "ea",
+        "oa",
+        "üa/aì",
+        "iù/uì",
+        "iö/uö"
+    ],
+    "descriptive": [
+        "oi",
+        "eo",
+        "eö",
+        "oe",
+        "öe",
+        "ëu",
+        "üo/oì",
+        "üe/eì",
+        "üö/aù"
+    ]
 }
 
 window.onload = renderDictionary;
@@ -237,7 +237,7 @@ function renderDictionaryEntry(entry) {
     return wrapper;
 };
 
-function Tab(label, target){
+function Tab(label, target) {
     var node = document.createElement("li");
     node.className = "tab-item";
     node.textContent = label;
@@ -251,14 +251,14 @@ function Tab(label, target){
 };
 
 // 
-Tab.prototype.activate = function(){
+Tab.prototype.activate = function() {
     this.node.classList.add("active");
     this.target.classList.remove("hidden");
     return this;
 };
 //
 
-Tab.prototype.deactivate = function(){
+Tab.prototype.deactivate = function() {
     this.node.classList.remove("active");
     this.target.classList.add("hidden");
     return this;
@@ -269,37 +269,37 @@ function TabBar(map) {
     var self = this;
     var fragment = document.createDocumentFragment();
 
-      var wrapper = document.createElement("nav");
-      wrapper.className = "tab-bar";
+    var wrapper = document.createElement("nav");
+    wrapper.className = "tab-bar";
 
-      var list = document.createElement("ul");
-      list.className = "tab-list";
+    var list = document.createElement("ul");
+    list.className = "tab-list";
 
-      wrapper.appendChild(list);
-      fragment.appendChild(wrapper);
+    wrapper.appendChild(list);
+    fragment.appendChild(wrapper);
 
-      var tabs = [];
+    var tabs = [];
 
-      for (var key in map) {
-          var tab = new Tab(key, map[key]);
-          var node = tab.node;
-          // place the tab's list item in the tab bar's list node
-          list.appendChild(node);
-          node.addEventListener("click", (function(theTab) {
-              return function() {
-                  self.reset();
-                  theTab.activate();
-              };
-          })(tab));
+    for (var key in map) {
+        var tab = new Tab(key, map[key]);
+        var node = tab.node;
+        // place the tab's list item in the tab bar's list node
+        list.appendChild(node);
+        node.addEventListener("click", (function(theTab) {
+            return function() {
+                self.reset();
+                theTab.activate();
+            };
+        })(tab));
 
-          // add it to our collection of Tab objects
-          tabs.push(tab);
-      };
+        // add it to our collection of Tab objects
+        tabs.push(tab);
+    };
     this.node = fragment;
     this.tabs = tabs;
     return this;
 
-  };
+};
 
 TabBar.prototype.reset = function() {
     this.tabs.forEach(function(tab) {
@@ -321,7 +321,7 @@ function renderSearchBar() {
     var root = elt("option", "root");
     var derived = elt("option", "derived");
     var stems = elt("option", "stems");
-    var all = elt("option", "all")
+    var all = elt("option", "all");
 
     var select = elt("select", gloss, root, stems, derived, all);
     // add event listeners
@@ -335,14 +335,28 @@ function renderSearchBar() {
         });
         results.forEach(function(entry) {
             entry.node.classList.remove("hidden");
-        })
+        });
     };
 
     function search() {
         dictionarySearch(select.value, searchBox.value);
     };
-    var form = elt("form", searchBox, select);
-    form.className = "search-bar";
-    return form
+    var options = ["stative", "dynamic", "manifestive", "descriptive"].map((item) =>
+        elt("option", item));
+    var fnToggle = elt("select", ...options);
 
-}
+    function toggleFn() {
+        let lx = [...document.querySelectorAll(".lx-wrapper")];
+        lx.forEach((lx) => {
+            ["stative", "dynamic", "manifestive", "descriptive"]
+                .forEach((name) => lx.classList.remove(name));
+            console.log(`value is ${this.value}`);
+            lx.classList.add(this.value);
+        });
+    };
+    fnToggle.addEventListener("change", toggleFn);
+    var form = elt("form", searchBox, select, fnToggle);
+    form.className = "search-bar";
+    return form;
+
+};

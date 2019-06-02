@@ -5,7 +5,7 @@
 html, body {
   margin: 0;
   padding: 0;
-  font-family: Lato, sans-serif;
+  font: 16px "Helvetica Neue", Helvetica, sans-serif;
   background: #ccc;
   color: #222; }
 
@@ -120,8 +120,6 @@ header.page-header {
     font-weight: 400;
     height: 100%;
     width: 100%;
-    background: #444;
-    color: whitesmoke;
     z-index: 5;
     transition: all 250ms ease-out;
     border-right: 1px solid rgba(0, 0, 0, 0.2);
@@ -130,16 +128,26 @@ header.page-header {
     transform: translateY(0%); }
 
 .stative .lx-stem:before {
-  content: attr(ithkuil-stative) "-"; }
+  content: attr(ithkuil-stative) "-";
+  color: whitesmoke;
+  background: royalblue;
+}
 
 .dynamic .lx-stem:before {
-  content: attr(ithkuil-dynamic) "-"; }
+  content: attr(ithkuil-dynamic) "-";
+  color: whitesmoke;
+  background: orangered;
+}
 
 .manifestive .lx-stem:before {
-  content: attr(ithkuil-manifestive) "-"; }
+  content: attr(ithkuil-manifestive) "-";
+  color: black;
+  background: gold;}
 
 .descriptive .lx-stem:before {
-  content: attr(ithkuil-descriptive) "-"; }
+  content: attr(ithkuil-descriptive) "-";
+  color: black;
+  background: lawngreen;}
 
 .hidden {
   display: none;
